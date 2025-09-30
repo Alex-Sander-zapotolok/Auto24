@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mariadb
--- Loomise aeg: Sept 30, 2025 kell 08:33 EL
+-- Loomise aeg: Sept 30, 2025 kell 08:53 EL
 -- Serveri versioon: 12.0.2-MariaDB-ubu2404
 -- PHP versioon: 8.2.27
 
@@ -65,16 +65,16 @@ CREATE TABLE `vehicles` (
   `ID` int(10) UNSIGNED NOT NULL,
   `Brand` varchar(100) NOT NULL,
   `Model` varchar(100) NOT NULL,
-  `Year` int(4) NOT NULL,
-  `Price` decimal(10,2) NOT NULL,
-  `Description` text DEFAULT NULL,
-  `Images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Location` varchar(255) DEFAULT NULL,
-  `Contact_name` varchar(100) DEFAULT NULL,
-  `Contact_phone` varchar(20) DEFAULT NULL,
-  `Contact_email` varchar(100) DEFAULT NULL,
-  `Created_at` timestamp NULL DEFAULT current_timestamp(),
-  `Updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `year` year(4) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `contact_name` varchar(100) DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `contact_email` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
