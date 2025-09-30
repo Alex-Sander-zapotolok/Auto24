@@ -7,7 +7,7 @@ SET time_zone = "+00:00";
 
 ---
 
--- Tabel: makes
+-- Table: makes
 
 ---
 
@@ -20,7 +20,7 @@ UNIQUE KEY `uq_make_name` (`name`)
 
 ---
 
--- Tabel: models (ainult kataloogiandmed)
+-- Table: models (ainult kataloogiandmed)
 
 ---
 
@@ -37,7 +37,7 @@ CONSTRAINT `fk_models_makes` FOREIGN KEY (`make_id`) REFERENCES `makes`(`id`) ON
 
 ---
 
--- Tabel: vehicles (konkreetne auto kuulutus)
+-- Table: vehicles (konkreetne auto kuulutus)
 
 ---
 
@@ -68,7 +68,7 @@ CONSTRAINT `fk_vehicles_users` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) 
 
 ---
 
--- Tabel: vehicle_images (üks pilt = üks rida)
+-- Table: vehicle_images (üks pilt = üks rida)
 
 ---
 
@@ -84,7 +84,7 @@ CONSTRAINT `fk_vehicle_images_vehicle` FOREIGN KEY (`vehicle_id`) REFERENCES `ve
 
 ---
 
--- Tabel: users
+-- Table: users
 
 ---
 
