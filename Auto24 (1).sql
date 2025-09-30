@@ -1,49 +1,34 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
--- https://www.phpmyadmin.net/
---
--- Host: mariadb
--- Loomise aeg: Sept 30, 2025 kell 12:22 PL
--- Serveri versioon: 12.0.2-MariaDB-ubu2404
--- PHP versioon: 8.2.27
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Andmebaas: `Auto24`
---
-
 -- --------------------------------------------------------
-
---
--- Tabeli struktuur tabelile `makes`
---
-
+-- Tabel: makes
+-- --------------------------------------------------------
 CREATE TABLE `makes` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
+ALTER TABLE `makes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+ALTER TABLE `makes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 -- --------------------------------------------------------
-
---
--- Tabeli struktuur tabelile `models`
---
-
+-- Tabel: models
+-- --------------------------------------------------------
 CREATE TABLE `models` (
   `id` int(11) NOT NULL,
   `make_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `vin` varchar(17) DEFAULT NULL,
-  `year` smallint(5) UNSIGNED NOT NULL CHECK (`year` between 1800 and 2099),
+  `year` smallint(5) UNSIGNED NOT NULL CHECK (`year` BETWEEN 1800 AND 2099),
   `price` decimal(10,2) NOT NULL,
   `description` text DEFAULT NULL,
   `engine` varchar(50) DEFAULT NULL,
@@ -56,33 +41,24 @@ CREATE TABLE `models` (
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
--- --------------------------------------------------------
+ALTER TABLE `models`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `vin` (`vin`),
+  ADD KEY `idx_models_make_id` (`make_id`);
 
---
--- Tabeli struktuur tabelile `users`
---
+ALTER TABLE `models`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
-CREATE TABLE `users` (
-  `ID` int(11) NOT NULL COMMENT 'User Unique Identification',
-  `Username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Username',
-  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'E-mail Address',
-  `Password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Hash Password',
-  `Create_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Date Of Creation',
-  `Update_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Last Updated',
-  `Is_active` tinyint(1) NOT NULL COMMENT 'User Activity Status',
-  `Role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'User Role'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='users';
+-- Võõrvõti make → models
+ALTER TABLE `models`
+  ADD CONSTRAINT `fk_models_makes` FOREIGN KEY (`make_id`) REFERENCES `makes`(`id`) ON DELETE CASCADE;
 
 -- --------------------------------------------------------
-
---
--- Tabeli struktuur tabelile `vehicles`
---
-
+-- Tabel: vehicles
+-- --------------------------------------------------------
 CREATE TABLE `vehicles` (
   `ID` int(10) UNSIGNED NOT NULL,
-  `Brand` varchar(100) NOT NULL,
-  `Model` varchar(100) NOT NULL,
+  `model_id` int(11) NOT NULL,  -- lisame mudeli viite
   `year` year(4) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `description` text DEFAULT NULL,
@@ -95,76 +71,35 @@ CREATE TABLE `vehicles` (
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Indeksid tõmmistatud tabelitele
---
-
---
--- Indeksid tabelile `makes`
---
-ALTER TABLE `makes`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indeksid tabelile `models`
---
-ALTER TABLE `models`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `vin` (`vin`),
-  ADD KEY `idx_models_make_id` (`make_id`);
-
---
--- Indeksid tabelile `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`ID`);
-
---
--- Indeksid tabelile `vehicles`
---
 ALTER TABLE `vehicles`
-  ADD PRIMARY KEY (`ID`);
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `idx_vehicles_model_id` (`model_id`);
 
---
--- AUTO_INCREMENT tõmmistatud tabelitele
---
-
---
--- AUTO_INCREMENT tabelile `makes`
---
-ALTER TABLE `makes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT tabelile `models`
---
-ALTER TABLE `models`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT tabelile `users`
---
-ALTER TABLE `users`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'User Unique Identification';
-
---
--- AUTO_INCREMENT tabelile `vehicles`
---
 ALTER TABLE `vehicles`
   MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
---
--- Tõmmistatud tabelite piirangud
---
+-- Võõrvõti vehicles → models
+ALTER TABLE `vehicles`
+  ADD CONSTRAINT `fk_vehicles_models` FOREIGN KEY (`model_id`) REFERENCES `models`(`id`) ON DELETE RESTRICT;
 
---
--- Piirangud tabelile `models`
---
-ALTER TABLE `models`
-  ADD CONSTRAINT `fk_models_makes` FOREIGN KEY (`make_id`) REFERENCES `makes` (`id`) ON DELETE CASCADE;
+-- --------------------------------------------------------
+-- Tabel: users
+-- --------------------------------------------------------
+CREATE TABLE `users` (
+  `ID` int(11) NOT NULL COMMENT 'User Unique Identification',
+  `Username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Username',
+  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'E-mail Address',
+  `Password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Hash Password',
+  `Create_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Date Of Creation',
+  `Update_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Last Updated',
+  `Is_active` tinyint(1) NOT NULL COMMENT 'User Activity Status',
+  `Role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'User Role'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='users';
+
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`ID`);
+
+ALTER TABLE `users`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'User Unique Identification';
+
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
