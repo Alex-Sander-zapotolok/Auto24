@@ -1,139 +1,105 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
--- https://www.phpmyadmin.net/
---
--- Host: mariadb
--- Loomise aeg: Sept 30, 2025 kell 08:53 EL
--- Serveri versioon: 12.0.2-MariaDB-ubu2404
--- PHP versioon: 8.2.27
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Andmebaas: `Auto24`
---
+---
 
--- --------------------------------------------------------
+-- Tabel: makes
 
---
--- Tabeli struktuur tabelile `transactions`
---
+---
 
-CREATE TABLE `transactions` (
-  `Transaction_id` int(11) NOT NULL COMMENT 'Unique Transaction ID',
-  `User_id` int(11) NOT NULL COMMENT 'User ID',
-  `Amount` decimal(10,2) NOT NULL COMMENT 'Transaction Amount',
-  `Currency` varchar(3) NOT NULL COMMENT 'Currency',
-  `Transaction_type` ENUM('payment' , 'refund' , 'transfer') NOT NULL COMMENT 'Transaction Type',
-  `Status` ENUM('PENDING' , 'PAID' , 'FAILED' , 'REFUNDED') NOT NULL COMMENT 'Transaction Status',
-  `Created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Transaction Creation Date',
-  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Last Date Of Update'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='transactions';
-
--- --------------------------------------------------------
-
---
--- Tabeli struktuur tabelile `users`
---
-
-CREATE TABLE `users` (
-  `ID` int(11) NOT NULL COMMENT 'User Unique Identification',
-  `Username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Username',
-  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'E-mail Address',
-  UNIQUE KEY 'uk_users_username' ('Username'),
-  UNIQUE KEY 'uk_users_email' ('Email')
-  `Password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Hash Password',
-  `Create_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Date Of Creation',
-  `Update_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Last Updated',
-  `Is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'User Activity Status',
-  `Role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'User Role'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='users';
-
--- --------------------------------------------------------
-
---
--- Tabeli struktuur tabelile `vehicles`
---
-
-CREATE TABLE `vehicles` (
-  `ID` int(10) UNSIGNED NOT NULL,
-  `Brand` varchar(100) NOT NULL,
-  `Model` varchar(100) NOT NULL,
-  `year` smallint UNSIGNED NOT NULL CHECK ('year' BETWEEN 1800 AND 2099),
-  `price` decimal(10,2) NOT NULL,
-  `description` text DEFAULT NULL,
-  `location` varchar(255) DEFAULT NULL,
-  `contact_name` varchar(100) DEFAULT NULL,
-  `contact_phone` varchar(20) DEFAULT NULL,
-  `contact_email` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+CREATE TABLE `makes` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(100) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `uq_make_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE 'vehicle_images' (
-  'id' int(11) NOT NULL AUTO_INCREMENT,
-  'vehicle_id' int(10) UNSIGNED NOT NULL,
-  'image_url' varchar(255) NOT NULL,
-  'sort_order' int(11) DEFAULT 0,
-  'is_visible' tinyint(1) DEFAULT 1,
-  PRIMARY KEY ('id')
-  KEY 'idx_vehicle_id' ('vehicle_id'),
-  CONSTRAINT 'fk_vehicle_images_vehicle' FOREIGN KEY ('vehicle_id') REFERENCES
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+---
 
---
--- Indeksid tõmmistatud tabelitele
---
+-- Tabel: models (ainult kataloogiandmed)
 
---
--- Indeksid tabelile `transactions`
---
-ALTER TABLE `transactions`
-  ADD PRIMARY KEY (`Transaction_id`);
+---
 
---
--- Indeksid tabelile `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`ID`);
+CREATE TABLE `models` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`make_id` INT UNSIGNED NOT NULL,
+`name` VARCHAR(100) NOT NULL,
+`created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+KEY `idx_models_make_id` (`make_id`),
+CONSTRAINT `fk_models_makes` FOREIGN KEY (`make_id`) REFERENCES `makes`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Indeksid tabelile `vehicles`
---
-ALTER TABLE `vehicles`
-  ADD PRIMARY KEY (`ID`);
+---
 
---
--- AUTO_INCREMENT tõmmistatud tabelitele
---
+-- Tabel: vehicles (konkreetne auto kuulutus)
 
---
--- AUTO_INCREMENT tabelile `transactions`
---
-ALTER TABLE `transactions`
-  MODIFY `Transaction_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Unique Transaction ID';
+---
 
---
--- AUTO_INCREMENT tabelile `users`
---
-ALTER TABLE `users`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'User Unique Identification';
+CREATE TABLE `vehicles` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`model_id` INT UNSIGNED NOT NULL,
+`vin` VARCHAR(17) NOT NULL,
+`year` SMALLINT UNSIGNED NOT NULL CHECK (`year` BETWEEN 1800 AND 2099),
+`price` DECIMAL(10,2) NOT NULL,
+`description` TEXT DEFAULT NULL,
+`engine` VARCHAR(50) DEFAULT NULL,
+`mileage` INT UNSIGNED DEFAULT NULL,
+`fuel_type` ENUM('Petrol','Diesel','Electric','Hybrid','Other') DEFAULT NULL,
+`transmission` ENUM('Manual','Automatic','Semi-Auto') DEFAULT NULL,
+`doors` TINYINT UNSIGNED DEFAULT NULL,
+`seats` TINYINT UNSIGNED DEFAULT NULL,
+`location` VARCHAR(255) DEFAULT NULL,
+`user_id` INT UNSIGNED NOT NULL,
+`created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+UNIQUE KEY `uq_vehicles_vin` (`vin`),
+KEY `idx_vehicles_model_id` (`model_id`),
+KEY `idx_vehicles_user_id` (`user_id`),
+CONSTRAINT `fk_vehicles_models` FOREIGN KEY (`model_id`) REFERENCES `models`(`id`) ON DELETE RESTRICT,
+CONSTRAINT `fk_vehicles_users` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- AUTO_INCREMENT tabelile `vehicles`
---
-ALTER TABLE `vehicles`
-  MODIFY `ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+---
+
+-- Tabel: vehicle_images (üks pilt = üks rida)
+
+---
+
+CREATE TABLE `vehicle_images` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+`vehicle_id` INT UNSIGNED NOT NULL,
+`image_url` VARCHAR(255) NOT NULL,
+`is_cover` TINYINT(1) NOT NULL DEFAULT 0,
+PRIMARY KEY (`id`),
+KEY `idx_vehicle_images_vehicle_id` (`vehicle_id`),
+CONSTRAINT `fk_vehicle_images_vehicle` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+---
+
+-- Tabel: users
+
+---
+
+CREATE TABLE `users` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'User Unique Identification',
+`username` VARCHAR(255) NOT NULL COMMENT 'Username',
+`email` VARCHAR(255) NOT NULL COMMENT 'E-mail Address',
+`password_hash` VARCHAR(255) NOT NULL COMMENT 'Hash Password',
+`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date Of Creation',
+`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last Updated',
+`is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'User Activity Status',
+`role` ENUM('admin','user','moderator') NOT NULL DEFAULT 'user' COMMENT 'User Role',
+PRIMARY KEY (`id`),
+UNIQUE KEY `uq_users_username` (`username`),
+UNIQUE KEY `uq_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='users';
+
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
