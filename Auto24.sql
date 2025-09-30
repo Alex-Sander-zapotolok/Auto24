@@ -32,10 +32,10 @@ CREATE TABLE `transactions` (
   `User_id` int(11) NOT NULL COMMENT 'User ID',
   `Amount` decimal(10,2) NOT NULL COMMENT 'Transaction Amount',
   `Currency` varchar(3) NOT NULL COMMENT 'Currency',
-  `Transaction_type` varchar(50) NOT NULL COMMENT 'Transaction Type',
-  `Status` varchar(50) NOT NULL COMMENT 'Transaction Status',
-  `Created_at` timestamp NOT NULL COMMENT 'Transaction Creation Date',
-  `Updated_at` timestamp NOT NULL COMMENT 'Last Date Of Update'
+  `Transaction_type` ENUM('payment' , 'refund' , 'transfer') NOT NULL COMMENT 'Transaction Type',
+  `Status` ENUM('PENDING' , 'PAID' , 'FAILED' , 'REFUNDED') NOT NULL COMMENT 'Transaction Status',
+  `Created_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Transaction Creation Date',
+  `Updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Last Date Of Update'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='transactions';
 
 -- --------------------------------------------------------
@@ -48,10 +48,12 @@ CREATE TABLE `users` (
   `ID` int(11) NOT NULL COMMENT 'User Unique Identification',
   `Username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Username',
   `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'E-mail Address',
+  UNIQUE KEY 'uk_users_username' ('Username'),
+  UNIQUE KEY 'uk_users_email' ('Email')
   `Password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Hash Password',
   `Create_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Date Of Creation',
-  `Update_at` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Last Updated',
-  `Is_active` tinyint(1) NOT NULL COMMENT 'User Activity Status',
+  `Update_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Last Updated',
+  `Is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'User Activity Status',
   `Role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'User Role'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci COMMENT='users';
 
@@ -65,10 +67,9 @@ CREATE TABLE `vehicles` (
   `ID` int(10) UNSIGNED NOT NULL,
   `Brand` varchar(100) NOT NULL,
   `Model` varchar(100) NOT NULL,
-  `year` year(4) NOT NULL,
+  `year` smallint UNSIGNED NOT NULL CHECK ('year' BETWEEN 1800 AND 2099),
   `price` decimal(10,2) NOT NULL,
   `description` text DEFAULT NULL,
-  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,
   `contact_name` varchar(100) DEFAULT NULL,
   `contact_phone` varchar(20) DEFAULT NULL,
@@ -76,6 +77,17 @@ CREATE TABLE `vehicles` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE 'vehicle_images' (
+  'id' int(11) NOT NULL AUTO_INCREMENT,
+  'vehicle_id' int(10) UNSIGNED NOT NULL,
+  'image_url' varchar(255) NOT NULL,
+  'sort_order' int(11) DEFAULT 0,
+  'is_visible' tinyint(1) DEFAULT 1,
+  PRIMARY KEY ('id')
+  KEY 'idx_vehicle_id' ('vehicle_id'),
+  CONSTRAINT 'fk_vehicle_images_vehicle' FOREIGN KEY ('vehicle_id') REFERENCES
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 --
 -- Indeksid tõmmistatud tabelitele
